@@ -1,6 +1,7 @@
 #!/bin/bash
 board=(1 2 3 4 5 6 7 8 9)
 turn=1
+save_file="tic_tac_toe.save"
 
 draw() {
     clear
@@ -25,6 +26,19 @@ check_win() {
         fi
     done
     return 1
+}
+
+save_game() {
+    echo "${board[@]}" > "$save_file"
+    echo "$turn" >> "$save_file"
+    exit 0
+}
+
+load_game() {
+    if [[ -f "$save_file" ]]; then
+        board=($(head -n 1 "$save_file"))
+        turn=$(tail -n 1 "$save_file")
+    fi
 }
 
 comp_move() {
@@ -56,7 +70,15 @@ while true; do
     fi
 
     if [[ $turn -eq 1 ]]; then
-        read -p "Ruch (1-9): " ch
+        read -p "Ruch (1-9), [s] zapisz, [l] wczytaj: " ch
+        if [[ "$ch" == "s" ]]; then
+            save_game
+            continue
+        fi
+        if [[ "$ch" == "l" ]]; then
+            load_game
+            continue
+        fi
         if [[ "$ch" =~ ^[1-9]$ ]]; then
             idx=$((ch - 1))
             if [[ "${board[$idx]}" =~ ^[1-9]$ ]]; then
